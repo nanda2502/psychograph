@@ -8,7 +8,7 @@ import csv
 import pickle
 import re
 
-def read_and_filter_data(file_path, keywords, start_year, end_year, ) -> tuple[list[str], list[tuple[str, str]], dict[str, tuple[str, list[str]]]]:
+def read_and_filter_data(file_path, keywords, start_year, end_year, use_all = False) -> tuple[list[str], list[tuple[str, str]], dict[str, tuple[str, list[str]]]]:
     try:
         with gzip.open(file_path, 'rt', encoding='utf-8') as file:
             data = json.load(file)
@@ -25,7 +25,7 @@ def read_and_filter_data(file_path, keywords, start_year, end_year, ) -> tuple[l
             continue
 
         journal_titles = set(item.get("container-title", []) + item.get("short-container-title", []))
-        if any(keyword.lower() in title.lower() for title in journal_titles for keyword in keywords) or :
+        if use_all or any(keyword.lower() in title.lower() for title in journal_titles for keyword in keywords):
             try:
                 date_parts = item.get("published", {}).get("date-parts", [[None]])
                 publication_year = date_parts[0][0] if date_parts and date_parts[0] else None
@@ -35,8 +35,8 @@ def read_and_filter_data(file_path, keywords, start_year, end_year, ) -> tuple[l
                 print(f"Warning: Could not extract publication year for DOI: {item.get('DOI', 'Unknown')}: {str(e)}")
                 continue
 
-            if publication_year and int(start_year) <= int(publication_year) <= int(end_year):
-                if any(journal in journal_titles for journal in keywords):
+            if use_all or publication_year and int(start_year) <= int(publication_year) <= int(end_year):
+                if use_all or any(journal in journal_titles for journal in keywords):
                     doi = item.get("DOI")
                     title = item.get("title", [""])[0]
                     subjects = item.get("subject", [])
@@ -58,10 +58,10 @@ def read_and_filter_data(file_path, keywords, start_year, end_year, ) -> tuple[l
 def helper_task(params) -> tuple[list[str], list[str]]:
     return read_and_filter_data(*params)
 
-def process_files(directory, keywords, start_year, end_year) -> list[str]:
+def process_files(directory: str, keywords: list[str], start_year: int, end_year: int, use_all: bool = False):
     files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.json.gz')]
     with ProcessPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
-        tasks = [(file, keywords, start_year, end_year) for file in files]
+        tasks = [(file, keywords, start_year, end_year, use_all) for file in files]
         results = list(executor.map(helper_task, tasks))
 
     all_dois = [doi for sublist in results for doi in sublist[0]]
@@ -103,10 +103,10 @@ def main():
     output_file_metadata = "./data/metadata.pkl"
     
     keywords = read_keywords(keywords_file)
-    start_year = 2014
-    end_year = 2023
+    start_year = 1
+    end_year = 2024
     
-    all_dois, edges, metadata = process_files(directory, keywords, int(start_year), int(end_year))
+    all_dois, edges, metadata = process_files(directory, keywords, int(start_year), int(end_year), use_all = True)
 
     save_dois_to_text_file(all_dois, output_file_dois)
     save_edges_to_csv_file(edges, output_file_edges)

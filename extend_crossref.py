@@ -46,7 +46,7 @@ def main():
     file_number = 1
     
     while True:
-        response = fetch_entries(cursor=initial_cursor, email)
+        response = fetch_entries(cursor=initial_cursor, email=email)
         
         if response.status_code == 200:
             data = response.json()
