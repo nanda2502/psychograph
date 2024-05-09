@@ -1,10 +1,11 @@
 # Psychograph
 
-Psychograph is an asynchronous Python project designed to create a citation network of academic articles based on predefined keywords and AI-driven content analysis. 
+Psychograph is a Python project designed to create a citation network of academic articles based on predefined keywords. 
 
 ## Prerequisites
 
 Before you can run Psychograph, you need to ensure your system has Python 3.7 or higher installed. This project uses several external libraries which are listed in the `requirements.txt` file.
+If you want to run your own search through the crossref database, you will need around 180 GB of disk space to do the search locally. 
 
 ## Installation
 
@@ -15,19 +16,31 @@ git clone https://github.com/yourgithubusername/psychograph.git
 cd psychograph
 pip install -r requirements.txt
 ```
-## Scopus API Setup
-To use the SCOPUS API with pybliometrics you will need to specify an API key. If you have access through an educational institution subscribed to SCOPUS, you can request a key [here](https://dev.elsevier.com/). You will be prompted to enter this key when running the `reference_retrieval_scopus.py` module. Furthermore, SCOPUS can only be used with a connection from an institution with a SCOPUS subscription, this means that you either have to connect directly through your institutional network, configure a proxy in the pybliometrics config file, or use a VPN from your institutional network. 
 
 ## Usage
 
 Create a ./data directory with the following files
 
-- `chosen_journals.txt`: Contains a list of predefined journal names that should be included in the search, each on a new line.
-- `journal_keywords.txt`: Contains keywords used for identifying additional journal, each on a new line.
-- crossref directory containing the latest crossref public data file. You can download the file from 2023  [here](https://academictorrents.com/details/d9e554f4f0c3047d9f49e448a7004f7aa1701b69)
+- `keywords.txt`: Contains a list of chosen journals, as well as keywords used for identifying additional journals.
+- `crossref/` directory containing the latest crossref public data file. You can download the file from 2023 [here](https://academictorrents.com/details/d9e554f4f0c3047d9f49e448a7004f7aa1701b69)
 
 
-You can run each of the modules separately using the command 
+### Extend Crossref Public Data File to Include 2024 
 ```bash
-python -m asyncio <module_name>.py
+python extend_crossref.py
+``` 
+
+### Find Journal Articles and Retrieve Metadata
+```bash
+python doi_retrieval.py
 ```
+
+After running `doi_retrieval.py`, you will have an edgelist `edges.csv`, and a dictionary with metadata `metadata.pkl`, which includes the publication year, title and subjects of the journal in which the article was published.
+
+### Build Graph
+
+```bash
+python graph_psych.py
+python annotate_graph.py
+``` 
+

@@ -1,4 +1,10 @@
 /wikipedia_graph
 /venv
 /test
-/data
+/data_graph
+*.ipynb
+*.sh
+reference_retrieval_crossref.py
+reference_retrieval_scopus.py
+identify_journals.py
+graph.py
