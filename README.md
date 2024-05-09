@@ -2,6 +2,7 @@
 
 Psychograph is a Python project designed to create a citation network of academic articles based on predefined keywords. 
 
+## Citation Network of Articles Published in Psychology Journals Between 2014 and 2023
 ![Citation Network of Articles Published in Psychology Journals Between 2014 and 2023](https://github.com/nanda2502/psychograph/blob/main/data/annotated_graph_black_background.png)
 
 ## Prerequisites
