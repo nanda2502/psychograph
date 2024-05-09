@@ -18,7 +18,7 @@ def read_and_filter_data(file_path, keywords, start_year, end_year) -> tuple[lis
 
     dois = []
     edges = []
-    additional_info = {}
+    metadata = {}
 
     for item in data.get("items", []):
         if item.get("type") != "journal-article":
@@ -42,7 +42,7 @@ def read_and_filter_data(file_path, keywords, start_year, end_year) -> tuple[lis
                     subjects = item.get("subject", [])
                     if doi:
                         dois.append(doi)
-                        additional_info[doi] = (title, subjects, publication_year)
+                        metadata[doi] = (title, subjects, publication_year)
                         for ref in item.get("reference", []):
                             ref_doi = ref.get("DOI")
                             ref_year = ref.get("year")
@@ -51,9 +51,9 @@ def read_and_filter_data(file_path, keywords, start_year, end_year) -> tuple[lis
                                 if match:
                                     ref_year_clean = int(match.group())
                                     if start_year <= ref_year_clean <= end_year:
-                                        additional_info[ref_doi] = ("", "", ref_year_clean)
+                                        metadata[ref_doi] = ("", "", ref_year_clean)
                                         edges.append((doi, ref_doi))
-    return dois, edges, additional_info
+    return dois, edges, metadata
 
 def helper_task(params) -> tuple[list[str], list[str]]:
     return read_and_filter_data(*params)
@@ -67,8 +67,8 @@ def process_files(directory, keywords, start_year, end_year) -> list[str]:
     all_dois = [doi for sublist in results for doi in sublist[0]]
     all_edges = [edge for sublist in results for edge in sublist[1]]
     flattened_edges = [edge for sublist in all_edges for edge in sublist]
-    additional_info = {doi: info for sublist in results for doi, info in sublist[2].items()}
-    return all_dois, flattened_edges, additional_info
+    metadata = {doi: info for sublist in results for doi, info in sublist[2].items()}
+    return all_dois, flattened_edges, metadata
 
 def save_dois_to_text_file(dois, filename) -> None:
     with open(filename, "w") as file:
@@ -90,27 +90,27 @@ def read_target_years(filename) -> tuple[str, str]:
         end = file.readline().strip()
     return start, end
 
-def pickle_additional_info(additional_info, filename) -> None:
+def pickle_metadata(metadata, filename) -> None:
     with open(filename, 'wb') as file:
-        pickle.dump(additional_info, file)
+        pickle.dump(metadata, file)
 
 def main():
     time_start = time.time()
     directory = "./crossref_data/"
-    keywords_file = "./data/bio_keywords.txt"
-    output_file_dois = "./data/dois_bio.txt"
-    output_file_edges = "./data/edges_bio.csv"
-    output_file_additional_info = "./data/additional_info_bio.pkl"
+    keywords_file = "./data/keywords.txt"
+    output_file_dois = "./data/dois.txt"
+    output_file_edges = "./data/edges.csv"
+    output_file_metadata = "./data/metadata.pkl"
     
     keywords = read_keywords(keywords_file)
     start_year = 2014
     end_year = 2023
     
-    all_dois, edges, additional_info = process_files(directory, keywords, int(start_year), int(end_year))
+    all_dois, edges, metadata = process_files(directory, keywords, int(start_year), int(end_year))
 
     save_dois_to_text_file(all_dois, output_file_dois)
     save_edges_to_csv_file(edges, output_file_edges)
-    pickle_additional_info(additional_info, output_file_additional_info)
+    pickle_metadata(metadata, output_file_metadata)
     time_end = time.time()
     
     print(f"Processed {len(all_dois)} DOIs matching the target journals. Results saved to {output_file_dois} and {output_file_edges}. \n Total time: {time_end - time_start:.2f} seconds.")
