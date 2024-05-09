@@ -8,7 +8,7 @@ import os
 import gzip
 import sys
 
-def fetch_entries(cursor) -> requests.Response:
+def fetch_entries(cursor, email) -> requests.Response:
     url = "https://api.crossref.org/works"
     query_params = {
         'filter': 'from-index-date:2023-04-01', 
@@ -16,7 +16,7 @@ def fetch_entries(cursor) -> requests.Response:
         'cursor': cursor
     }
     headers = {
-        'Mailto': 'nandajafarian99@gmail.com'
+        'Mailto': f'{email}'
     }
     
     response = requests.get(url, params=query_params, headers=headers)
@@ -36,11 +36,17 @@ def save_entries(items, file_number) -> None:
 
 
 def main():
+    try:
+        email = str(sys.argv[1])
+    except:
+        print("Please provide an email address as the first argument for the http request header.")
+        sys.exit(1)
+
     initial_cursor = "*"
     file_number = 1
     
     while True:
-        response = fetch_entries(cursor=initial_cursor)
+        response = fetch_entries(cursor=initial_cursor, email)
         
         if response.status_code == 200:
             data = response.json()

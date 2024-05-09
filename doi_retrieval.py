@@ -8,7 +8,7 @@ import csv
 import pickle
 import re
 
-def read_and_filter_data(file_path, keywords, start_year, end_year) -> tuple[list[str], list[tuple[str, str]], dict[str, tuple[str, list[str]]]]:
+def read_and_filter_data(file_path, keywords, start_year, end_year, ) -> tuple[list[str], list[tuple[str, str]], dict[str, tuple[str, list[str]]]]:
     try:
         with gzip.open(file_path, 'rt', encoding='utf-8') as file:
             data = json.load(file)
@@ -25,7 +25,7 @@ def read_and_filter_data(file_path, keywords, start_year, end_year) -> tuple[lis
             continue
 
         journal_titles = set(item.get("container-title", []) + item.get("short-container-title", []))
-        if any(keyword.lower() in title.lower() for title in journal_titles for keyword in keywords):
+        if any(keyword.lower() in title.lower() for title in journal_titles for keyword in keywords) or :
             try:
                 date_parts = item.get("published", {}).get("date-parts", [[None]])
                 publication_year = date_parts[0][0] if date_parts and date_parts[0] else None
