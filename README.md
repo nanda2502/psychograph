@@ -4,7 +4,7 @@ Psychograph is a Python project designed to create a citation network of academi
 
 ## Citation Network of Articles Published in Psychology Journals Between 2014 and 2023
 ![Citation Network of Articles Published in Psychology Journals Between 2014 and 2023](https://github.com/nanda2502/psychograph/blob/main/data/annotated_graph_black_background.png)
-
+*Note*. Community labels were based on ad hoc interpretation and are not reliable at this stage. 
 ## Prerequisites
 
 Before you can run Psychograph, you need to ensure your system has Python 3.7 or higher installed. This project uses several external libraries which are listed in the `requirements.txt` file.
